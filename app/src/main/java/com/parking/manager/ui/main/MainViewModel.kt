@@ -26,4 +26,10 @@ class MainViewModel : ViewModel() {
         )
         _vehicles.value = dummyVehicles
     }
+
+    fun addVehicle(vehicle: Vehicle) {
+        val currentList = _vehicles.value?.toMutableList() ?: mutableListOf()
+        currentList.add(0, vehicle) // Add to the top of the list for immediate visibility
+        _vehicles.value = currentList
+    }
 }
