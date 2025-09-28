@@ -1,35 +1,27 @@
 package com.parking.manager.ui.main
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.parking.manager.model.Vehicle
-import java.util.concurrent.TimeUnit
+import com.parking.manager.repository.VehicleRepository
+import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
+class MainViewModel(private val repository: VehicleRepository) : ViewModel() {
 
-    private val _vehicles = MutableLiveData<List<Vehicle>>()
-    val vehicles: LiveData<List<Vehicle>> = _vehicles
-
-    init {
-        // Carregar dados iniciais para teste
-        loadVehicles()
-    }
-
-    private fun loadVehicles() {
-        // Dados de exemplo com placas no padrão antigo e Mercosul
-        val currentTime = System.currentTimeMillis()
-        val dummyVehicles = listOf(
-            Vehicle("BRA2E19", "Honda Civic", currentTime - TimeUnit.HOURS.toMillis(1)), // Mercosul
-            Vehicle("ABC-1234", "VW Fusca", currentTime - TimeUnit.HOURS.toMillis(2)),      // Antiga
-            Vehicle("PAU1A23", "Fiat Argo", currentTime - TimeUnit.MINUTES.toMillis(15)) // Mercosul
-        )
-        _vehicles.value = dummyVehicles
-    }
+    val vehicles: LiveData<List<Vehicle>> = repository.allVehicles.asLiveData()
 
     fun addVehicle(vehicle: Vehicle) {
-        val currentList = _vehicles.value?.toMutableList() ?: mutableListOf()
-        currentList.add(0, vehicle) // Add to the top of the list for immediate visibility
-        _vehicles.value = currentList
+        viewModelScope.launch {
+            repository.insert(vehicle)
+        }
+    }
+}
+
+class MainViewModelFactory(private val repository: VehicleRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return MainViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

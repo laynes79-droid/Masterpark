@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.parking.manager.ParkingManagerApplication
 import com.parking.manager.databinding.ActivityMainBinding
 import com.parking.manager.model.Vehicle
 import com.parking.manager.ui.add.AddVehicleActivity
@@ -15,7 +16,9 @@ import com.parking.manager.ui.main.adapter.VehicleAdapter
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels {
+        MainViewModelFactory((application as ParkingManagerApplication).repository)
+    }
     private val vehicleAdapter = VehicleAdapter()
 
     private val addVehicleLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
